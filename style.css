@@ -222,3 +222,45 @@ header { border-color: #17202c; }
 .mic { background: #151f30; }
 .send { background: #99c8ff; }
 @media (max-height: 500px) { .orb-stage { display: none; } }
+
+.orb-stage {
+  background: none;
+  mask-image: none;
+  isolation: isolate;
+}
+.orb {
+  width: clamp(88px, 19dvh, 150px);
+  background: radial-gradient(ellipse at 35% 80%, #123e59, #071c2b 48%, #020508 78%);
+  border: 1px solid #65f5ca70;
+  box-shadow: inset 8px -8px 20px #248ce457, -8px 10px 35px #2b65fa63;
+  animation: orb-drift 8s ease-in-out infinite;
+}
+.orb::before {
+  inset: -5%;
+  border: 0;
+  background: conic-gradient(from 20deg, transparent 18%, #376cff 44%, #72ffcb 62%, transparent 82%);
+  mask-image: radial-gradient(transparent 62%, #000 68%, transparent 74%);
+  box-shadow: none;
+  animation: orb-turn 12s linear infinite;
+}
+.orb::after {
+  inset: -23%;
+  z-index: -1;
+  background: conic-gradient(transparent 18%, #1647d94f, #43ffc46b, transparent 82%);
+  mask-image: none;
+  filter: blur(16px);
+  animation: orb-turn 12s linear infinite;
+}
+.orb[data-phase="listening"] { animation-duration: 2.6s; }
+.orb[data-phase="listening"]::before,
+.orb[data-phase="listening"]::after { animation-duration: 5s; }
+.orb[data-phase="speaking"] { animation-duration: 1.3s; }
+.orb[data-phase="speaking"]::before,
+.orb[data-phase="speaking"]::after { animation-duration: 2.6s; }
+@keyframes orb-drift {
+  0%, 100% { transform: translateY(2px) scale(.98); }
+  50% { transform: translateY(-4px) scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orb, .orb::before, .orb::after { animation: none !important; }
+}
