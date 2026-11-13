@@ -264,3 +264,39 @@ header { border-color: #17202c; }
 @media (prefers-reduced-motion: reduce) {
   .orb, .orb::before, .orb::after { animation: none !important; }
 }
+
+/* A cropped, layered field of light behind the conversation. */
+.shell { position: relative; isolation: isolate; }
+.orb-stage {
+  position: absolute;
+  inset: 56px 0 auto;
+  height: clamp(310px, 62dvh, 540px);
+  z-index: -1;
+  pointer-events: none;
+  place-items: start center;
+  mask-image: linear-gradient(#000 75%, transparent);
+  background: radial-gradient(ellipse at 18% 55%, #251397a6, transparent 62%),
+              radial-gradient(ellipse at 40% 64%, #0075ae48, transparent 66%);
+}
+.orb {
+  width: clamp(270px, 58dvh, 465px);
+  margin-top: -5%;
+  margin-left: -26%;
+  border-radius: 46% 54% 62% 38% / 54% 40% 60% 46%;
+  border-color: #7affcd73 transparent #50f6c4ad #58ffccbb;
+  background: radial-gradient(ellipse at 28% 82%, #124761, #061624 49%, #020609 75%);
+  box-shadow: -14px 16px 46px #1d42ff99, -4px 6px 13px #49ffd08c, inset 8px -8px 32px #2588c85c;
+}
+.orb::before, .orb::after { border-radius: inherit; }
+.orb::before { inset: -7%; opacity: .75; }
+.orb::after { inset: -18%; opacity: .6; }
+.orb[data-phase="listening"] {
+  background: radial-gradient(ellipse at 28% 82%, #146057, #082c37 48%, #02080c 76%);
+}
+.orb[data-phase="speaking"] {
+  background: radial-gradient(ellipse at 28% 82%, #353681, #101a45 48%, #050611 76%);
+}
+.chat { padding-top: clamp(190px, 39dvh, 325px); }
+.shell:has(.chat .user) .chat { padding-top: 18px; }
+.shell:has(.chat .user) .orb-stage { opacity: .32; }
+@media (max-height: 500px) { .chat { padding-top: 18px; } }
