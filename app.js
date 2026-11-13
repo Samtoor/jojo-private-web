@@ -32,7 +32,8 @@ const synth = window.speechSynthesis;
 let session = null;
 let spoken = null;
 
-function status(message) {
+function status(message, phase = 'idle') {
+  $('orb').dataset.phase = phase;
   $('voice-status').textContent = message;
 }
 
@@ -100,7 +101,7 @@ function listen(current) {
     recognition.interimResults = false;
     let transcript = '';
     recognition.onstart = () => {
-      if (session === current) status('Listening...');
+      if (session === current) status('Listening...', 'listening');
     };
     recognition.onresult = event => {
       if (session !== current) return;
@@ -125,7 +126,7 @@ function listen(current) {
         return;
       }
       const reply = send(transcript);
-      status('Replying...');
+      status('Replying...', 'speaking');
       const playbackFailed = () => stopVoice('Spoken reply unavailable. Tap the mic to try again.');
       current.timeout = setTimeout(playbackFailed, 60000);
       if (!speak(reply, () => {

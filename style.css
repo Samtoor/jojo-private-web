@@ -135,3 +135,54 @@ select, .danger {
 }
 .danger { margin-top: 18px; background: #472533; border-color: #875465; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+.orb-stage {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  height: clamp(92px, 23dvh, 180px);
+}
+.orb {
+  position: relative;
+  isolation: isolate;
+  width: clamp(64px, 16dvh, 114px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 27%, #ebfbff, #6bc9ff 20%, #5461dc 48%, #201744 76%);
+  box-shadow: inset 0 0 16px #b7a9ff80, 0 0 24px #635bda80;
+  animation: orb-pulse 5s ease-in-out infinite;
+}
+.orb::before, .orb::after {
+  position: absolute;
+  content: "";
+  border-radius: 50%;
+  pointer-events: none;
+}
+.orb::before {
+  inset: -9px;
+  border: 1px solid #899aff75;
+  box-shadow: 0 0 14px #6577ff50;
+}
+.orb::after {
+  inset: 9%;
+  background: conic-gradient(from 60deg, transparent, #d38eff85, transparent, #69ffe6a0, transparent);
+  filter: blur(6px);
+  animation: orb-turn 7s linear infinite;
+}
+.orb[data-phase="listening"] {
+  background: radial-gradient(circle at 36% 27%, #e9ffff, #5ff4e0 23%, #247fc0 53%, #102c58 78%);
+  box-shadow: inset 0 0 16px #a2ffec99, 0 0 28px #44e8d67a;
+  animation-duration: 1.8s;
+}
+.orb[data-phase="speaking"] {
+  background: radial-gradient(circle at 36% 27%, #fff0ff, #f38dff 22%, #7652ee 50%, #28194f 78%);
+  box-shadow: inset 0 0 16px #f9b2ff99, 0 0 28px #c45df681;
+  animation-duration: 0.9s;
+}
+.orb[data-phase="speaking"]::after { animation-duration: 2s; }
+@keyframes orb-pulse { 50% { transform: scale(1.08); } }
+@keyframes orb-turn { to { transform: rotate(360deg); } }
+@media (max-height: 500px) { .orb-stage { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .orb, .orb::after { animation: none; }
+}
