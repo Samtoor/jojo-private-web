@@ -8,7 +8,6 @@ const $=id=>document.getElementById(id);
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch{alert('Your iPhone storage is full or unavailable. New notes may not be saved.');}}
 function bubble(role,content){const div=document.createElement('div');div.className='bubble '+role;div.textContent=content;$('chat').appendChild(div);$('chat').scrollTop=$('chat').scrollHeight;}
 for(const m of state.messages.slice(-70)){if(m&&['assistant','user'].includes(m.role)&&typeof m.text==='string')bubble(m.role,m.text);}
-function speak(text,force=false){if((!state.speak&&!force)||!('speechSynthesis' in window))return false;try{speechSynthesis.cancel();const utter=new SpeechSynthesisUtterance(text);utter.lang=/[\u0900-\u097f]/.test(text)?'hi-IN':/[\u0a00-\u0a7f]/.test(text)?'pa-IN':'en-CA';utter.rate=.95;utter.onerror=()=>status('Speech playback failed. Check your volume and voice settings.');speechSynthesis.speak(utter);return true;}catch{return false;}}
 const tidy=t=>t.replace(/^\s+|\s+$/g,'');
 function answer(text){const t=tidy(text),s=t.toLowerCase();let m;
 if(/^(?:remember(?: that)?|note(?: that)?|save (?:a )?note[: ]|yaad rakh(?:na)?(?: ki)?|ਯਾਦ ਰੱਖ|याद रख)\s+(.+)/iu.test(t)){m=t.match(/^(?:remember(?: that)?|note(?: that)?|save (?:a )?note[: ]|yaad rakh(?:na)?(?: ki)?|ਯਾਦ ਰੱਖ|याद रख)\s+(.+)/iu);state.notes.push(m[1]);save();return 'Saved on this iPhone. 🔒 You can say “show my notes” or “delete all my data.”';}
@@ -24,35 +23,190 @@ if(/\b(?:kidda|kiddan|ki haal|kive|hanji|sat sri akaal|satsriakal|veere|paaji)\b
 if(/(?:कैसे हो|नमस्ते|क्या हाल|कैसा है)/u.test(s))return 'Namaste! Main jojo hoon. 😊 Aap kaise hain?';
 if(/\b(?:hello|hi|hey|good morning|good evening)\b/i.test(s))return 'Hey there! 👋 How can I help? I can remember notes and manage tasks locally.';
 if(/\b(?:thank you|thanks|shukriya|dhannvaad)\b/i.test(s))return 'You’re welcome! 😊';
-if(/(?:delete all my data|erase everything|clear my history)/i.test(s))return 'To delete everything safely, open ☷ Privacy & controls and press “Delete all local chats, notes & tasks.”';
-return 'I understand your message, but this offline starter does not have a full language model yet. I can help with private notes, tasks, simple greetings, and the date/time. Tap “Explore” for examples. I won’t send your message to a server to get an answer.';
+if(/(?:delete all my data|erase everything|clear my history)/i.test(s))return 'To delete everything safely, open Privacy & settings and press “Delete local chats, notes and tasks.”';
+return 'I understand your message, but this offline starter does not have a full language model yet. I can help with private notes, tasks, simple greetings, and the date/time. Tap “Help” for examples. I won’t send your message to a server to get an answer.';
 }
-function send(text){text=tidy(text);if(!text)return;bubble('user',text);state.messages.push({role:'user',text});let reply;try{reply=answer(text);}catch{reply='I hit a local error. Please try again.';}bubble('assistant',reply);state.messages.push({role:'assistant',text:reply});state.messages=state.messages.slice(-150);save();speak(reply);}
-$('composer').addEventListener('submit',e=>{e.preventDefault();const x=$('message');const t=x.value;x.value='';send(t);});
-document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>send(b.dataset.prompt)));
-$('settings').addEventListener('click',()=>{$('speak').checked=!!state.speak;$('mic-consent').checked=!!state.micConsent;$('voice-lang').value=state.voiceLang||'en-CA';$('privacy').showModal();});$('close').addEventListener('click',()=>$('privacy').close());$('speak').addEventListener('change',e=>{state.speak=e.target.checked;save();});
+function send(text){text=tidy(text);if(!text)return;bubble('user',text);state.messages.push({role:'user',text});let reply;try{reply=answer(text);}catch{reply='I hit a local error. Please try again.';}bubble('assistant',reply);state.messages.push({role:'assistant',text:reply});state.messages=state.messages.slice(-150);save();return reply;}
+const mic = $('mic');
+const synth = window.speechSynthesis;
+let session = null;
+let spoken = null;
 
-let recognition=null, listening=false;
-$('dictate').addEventListener('click',()=>{const m=$('message');m.focus();status('Use the microphone on your iPhone keyboard to dictate your message, then press Send.');});
-$('mic-test').addEventListener('click',async()=>{if(!navigator.mediaDevices?.getUserMedia){status('Microphone API unavailable. Open jojo directly in Safari, not WhatsApp.');return;}const btn=$('mic-test');btn.disabled=true;try{const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});stream.getTracks().forEach(t=>t.stop());status('Microphone permission works! Voice transcription may still be unavailable in this browser.');}catch(e){status('Mic test: '+(e.name||'unavailable')+'. Open Safari and check microphone site permissions.');}finally{btn.disabled=false;}});
-function status(msg){$('voice-status').textContent=msg;}
-function stopListening(){if(recognition){try{recognition.stop();}catch{}}listening=false;$('mic').textContent='🎙 Talk to jojo';}
-$('voice-test').addEventListener('click',()=>{if(!speak('Hello! I am jojo. Sat Sri Akal!',true))status('Voice playback is not supported in this browser.');});
-$('mic-consent').addEventListener('change',e=>{state.micConsent=e.target.checked;save();if(!state.micConsent)stopListening();});
-$('voice-lang').addEventListener('change',e=>{state.voiceLang=e.target.value;save();});
-$('mic').addEventListener('click',()=>{
- if(listening){stopListening();status('Microphone stopped.');return;}
- if(!state.micConsent){$('settings').click();status('Enable speech recognition in Privacy & controls first.');return;}
- const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SpeechRecognition){status('Speech recognition is not supported here. Use iPhone keyboard dictation or type.');return;}
- try{
-  recognition=new SpeechRecognition();recognition.lang=state.voiceLang||'en-CA';recognition.interimResults=false;recognition.continuous=false;recognition.maxAlternatives=1;
-  recognition.onresult=e=>{const t=e.results?.[0]?.[0]?.transcript;if(t){$('message').value=t;send(t);$('message').value='';status('Heard your message. Tap to speak again.');}};
-  recognition.onerror=e=>status('Speech recognition: '+(e.error||'unavailable')+'. Try Safari directly or iPhone dictation.');
-  recognition.onend=()=>{listening=false;$('mic').textContent='🎙 Talk to jojo';};
-  recognition.start();listening=true;$('mic').textContent='⏹ Stop listening';status('Listening…');
- }catch{status('Could not start microphone. Check Safari permissions.');}
+function status(message) {
+  $('voice-status').textContent = message;
+}
+
+function stopVoice(message = '') {
+  const previous = session;
+  session = null;
+  mic.setAttribute('aria-pressed', 'false');
+  clearTimeout(previous?.timeout);
+  previous?.recognition?.abort();
+  if (spoken) {
+    spoken = null;
+    synth.cancel();
+  }
+  status(message);
+}
+
+function speak(text, onEnd, onError) {
+  if (!synth) return false;
+  const language = /[\u0900-\u097f]/.test(text) ? 'hi-IN'
+    : /[\u0a00-\u0a7f]/.test(text) ? 'pa-IN' : 'en-CA';
+  const voices = synth.getVoices().filter(voice => voice.localService);
+  const voice = voices.find(voice => voice.lang === language)
+    || voices.find(voice => voice.lang.split('-')[0] === language.split('-')[0]);
+  if (!voice) return false;
+
+  spoken = null;
+  synth.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = voice;
+  utterance.lang = voice.lang;
+  utterance.rate = 0.95;
+  utterance.onend = () => {
+    if (spoken !== utterance) return;
+    spoken = null;
+    onEnd();
+  };
+  utterance.onerror = () => {
+    if (spoken !== utterance) return;
+    spoken = null;
+    onError();
+  };
+  spoken = utterance;
+  try {
+    synth.speak(utterance);
+    return true;
+  } catch {
+    spoken = null;
+    return false;
+  }
+}
+
+function listen(current) {
+  if (session !== current) return;
+  if (document.hidden || !state.micConsent) {
+    stopVoice();
+    return;
+  }
+
+  const fallback = 'Voice paused. Tap the mic, use keyboard dictation, or type.';
+  try {
+    const recognition = new current.Recognition();
+    current.recognition = recognition;
+    recognition.lang = state.voiceLang;
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    let transcript = '';
+    recognition.onstart = () => {
+      if (session === current) status('Listening...');
+    };
+    recognition.onresult = event => {
+      if (session !== current) return;
+      const result = event.results[event.resultIndex];
+      if (result?.isFinal) transcript = tidy(result[0].transcript);
+    };
+    recognition.onerror = event => {
+      if (session !== current) return;
+      const denied = event.error === 'not-allowed' || event.error === 'service-not-allowed';
+      stopVoice(denied ? 'Speech access blocked. Check Safari permissions or use keyboard dictation.' : fallback);
+    };
+    recognition.onend = () => {
+      if (session !== current || current.recognition !== recognition) return;
+      clearTimeout(current.timeout);
+      current.recognition = null;
+      if (document.hidden || !state.micConsent) {
+        stopVoice();
+        return;
+      }
+      if (!transcript) {
+        stopVoice(fallback);
+        return;
+      }
+      const reply = send(transcript);
+      status('Replying...');
+      const playbackFailed = () => stopVoice('Spoken reply unavailable. Tap the mic to try again.');
+      current.timeout = setTimeout(playbackFailed, 60000);
+      if (!speak(reply, () => {
+        clearTimeout(current.timeout);
+        listen(current);
+      }, playbackFailed)) playbackFailed();
+    };
+    status('Starting microphone...');
+    current.timeout = setTimeout(() => stopVoice(fallback), 20000);
+    recognition.start();
+  } catch {
+    stopVoice(fallback);
+  }
+}
+
+function sendTyped(text) {
+  if (!tidy(text)) return;
+  stopVoice();
+  const reply = send(text);
+  if (state.speak) {
+    const playbackFailed = () => status('Device voice unavailable.');
+    if (!speak(reply, () => {}, playbackFailed)) playbackFailed();
+  }
+}
+
+$('composer').addEventListener('submit', event => {
+  event.preventDefault();
+  const input = $('message');
+  sendTyped(input.value);
+  input.value = '';
 });
+document.querySelectorAll('[data-prompt]').forEach(button => {
+  button.addEventListener('click', () => sendTyped(button.dataset.prompt));
+});
+$('settings').addEventListener('click', () => {
+  stopVoice();
+  $('speak').checked = state.speak;
+  $('mic-consent').checked = state.micConsent;
+  $('voice-lang').value = state.voiceLang;
+  $('privacy').showModal();
+});
+$('close').addEventListener('click', () => $('privacy').close());
+$('speak').addEventListener('change', event => {
+  state.speak = event.target.checked;
+  save();
+});
+$('mic-consent').addEventListener('change', event => {
+  state.micConsent = event.target.checked;
+  save();
+  if (!state.micConsent) stopVoice();
+});
+$('voice-lang').addEventListener('change', event => {
+  state.voiceLang = event.target.value;
+  save();
+});
+
+mic.addEventListener('click', () => {
+  if (session) {
+    stopVoice();
+    return;
+  }
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) {
+    status('Voice mode unavailable. Use keyboard dictation or type.');
+    return;
+  }
+  if (!state.micConsent) {
+    $('settings').click();
+    $('mic-consent').focus();
+    return;
+  }
+
+  stopVoice();
+  session = {Recognition, recognition: null, timeout: null};
+  mic.setAttribute('aria-pressed', 'true');
+  listen(session);
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) stopVoice();
+});
+window.addEventListener('pagehide', () => stopVoice());
 
 $('clear').addEventListener('click',()=>{if(!confirm('Permanently delete all jojo chats, tasks, and notes from this iPhone?'))return;localStorage.removeItem(KEY);state=blank();$('chat').replaceChildren();bubble('assistant','All local jojo data deleted. You can start fresh.');$('privacy').close();});
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));

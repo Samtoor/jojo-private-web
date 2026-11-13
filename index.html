@@ -1,1 +1,79 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080e1c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="jojo"><meta name="description" content="jojo Private — offline personal companion"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon.png"><link rel="stylesheet" href="./style.css?v=4"><title>jojo • Private</title></head><body><main class="shell"><header><div class="brand"><div class="brandicon">j<span>.</span></div><div><div class="brandname">jojo <span>PRIVATE</span></div><div class="sub">Personal assistant · on your iPhone</div></div></div><button class="settings" id="settings" aria-label="Privacy settings">☷</button></header><section class="hero"><div class="orbwrap"><div class="orbit outer"></div><div class="orbit inner"></div><div class="orb"><div class="core"></div></div></div><div class="status"><span class="dot"></span> PRIVATE MODE · NO CLOUD AI</div><h1>Hey, I'm jojo.</h1><p>Your private space to think, plan, and remember.</p></section><section class="quick"><button data-prompt="What can you do?">✦ Explore</button><button data-prompt="Show my notes">▤ My notes</button><button data-prompt="Show my tasks">☑ Tasks</button></section><section class="chat" id="chat" role="log" aria-label="Conversation"><div class="bubble assistant">Sat Sri Akal! 👋 I'm jojo. I can help with notes, tasks, basic greetings and time/date — all without sending messages to an AI server. Try <strong>“Remember that I like coffee”</strong> or <strong>“Add buy milk to my tasks.”</strong></div></section><div class="voicebar"><button id="mic" type="button" aria-label="Talk to jojo">🎙 Talk to jojo</button><button id="voice-test" type="button">🔊 Test voice</button><button id="dictate" type="button">⌨️ iPhone dictation</button><span id="voice-status" role="status" aria-live="polite">Microphone off · tap to start</span></div><form class="composer" id="composer"><label for="message" class="sr">Message jojo</label><input id="message" autocomplete="off" enterkeyhint="send" placeholder="Message jojo…" maxlength="2000" required><button type="submit" aria-label="Send message">➤</button></form><div class="footer">Local-only starter • No account • No analytics</div></main><dialog id="privacy"><div class="dialoghead"><h2>Privacy & controls</h2><button id="close" aria-label="Close">✕</button></div><p><strong>Where is my data?</strong> Chats, notes, and tasks are stored in this browser's local storage on this device. They are <strong>not encrypted by this app</strong>; anyone with unlocked access to this browser profile may be able to read them.</p><p><strong>Network:</strong> This app contains no cloud AI API, analytics or chat upload functionality. You need internet only to open/install it for the first time or retrieve app updates. Hosting providers can see site visits, not chat contents sent by this app.</p><p><strong>Voice:</strong> Spoken replies use your iPhone's speech synthesis if enabled. Microphone recognition is optional and only starts after you enable it and tap Talk.</p><p><strong>Voice privacy:</strong> Spoken replies use device voices. Microphone recognition is optional and may use Apple speech servers. Disable it for strict offline privacy.</p><button id="mic-test" type="button" class="mic-test">🎤 Check microphone permission</button><p class="fine">This test only opens the microphone briefly, then stops it. It does not record, save, or upload audio and does not turn speech into text.</p><label class="toggle"><input id="mic-consent" type="checkbox"> Allow browser speech recognition when I tap Talk (may process audio externally)</label><label class="toggle"><input id="speak" type="checkbox"> Speak jojo's answers aloud</label><label for="voice-lang">Speech input language</label><select id="voice-lang"><option value="en-CA">English (Canada)</option><option value="pa-IN">Punjabi (may not be supported)</option><option value="hi-IN">Hindi</option></select><button class="danger" id="clear">Delete all local chats, notes & tasks</button><p class="fine">Do not put passwords or sensitive company data in this starter app. Offline features are basic: this is not yet a full language model or device controller.</p></dialog><script src="./app.js?v=4" defer></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080e1c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="jojo">
+<meta name="description" content="jojo Private — offline personal companion">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon.png">
+<link rel="stylesheet" href="./style.css?v=5">
+<title>jojo • Private</title>
+</head>
+<body>
+<main class="shell">
+<header>
+<h1>jojo</h1>
+<button class="icon settings" id="settings" aria-label="Privacy and settings">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 7h7m4 0h5M4 17h3m4 0h9"/>
+<circle cx="13" cy="7" r="2"/>
+<circle cx="9" cy="17" r="2"/>
+</svg>
+</button>
+</header>
+<section class="chat" id="chat" role="log" aria-label="Conversation">
+<div class="bubble assistant">How can I help?</div>
+</section>
+<nav class="quick" aria-label="Shortcuts">
+<button data-prompt="Show my notes">Notes</button>
+<button data-prompt="Show my tasks">Tasks</button>
+<button data-prompt="What can you do?">Help</button>
+</nav>
+<div id="voice-status" role="status"></div>
+<form class="composer" id="composer">
+<label for="message" class="sr">Message jojo</label>
+<input id="message" autocomplete="off" enterkeyhint="send" placeholder="Message jojo…" maxlength="2000" required>
+<button class="icon mic" id="mic" type="button" aria-label="Voice conversation" aria-pressed="false">
+<svg class="mic-symbol" viewBox="0 0 24 24" aria-hidden="true">
+<rect x="9" y="3" width="6" height="12" rx="3"/>
+<path d="M5 11v1a7 7 0 0 0 14 0v-1M12 19v3m-3 0h6"/>
+</svg>
+<svg class="stop-symbol" viewBox="0 0 24 24" aria-hidden="true">
+<rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/>
+</svg>
+</button>
+<button class="icon send" type="submit" aria-label="Send message">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 19V5m-6 6 6-6 6 6"/>
+</svg>
+</button>
+</form>
+</main>
+<dialog id="privacy">
+<div class="dialoghead">
+<h2>Privacy &amp; settings</h2>
+<button class="icon settings" id="close" aria-label="Close settings">×</button>
+</div>
+<p>Chats, notes and tasks stay in this browser profile and are accessible to anyone who can use it.</p>
+<p>Your browser may send microphone audio to its speech service. Jojo uses device voices for replies. Voice mode ends when you leave this page or switch away.</p>
+<label class="toggle">
+<input id="mic-consent" type="checkbox"> Allow browser speech recognition</label>
+<label class="toggle">
+<input id="speak" type="checkbox"> Read replies to typed messages aloud</label>
+<label for="voice-lang">Speech input language</label>
+<select id="voice-lang">
+<option value="en-CA">English (Canada)</option>
+<option value="pa-IN">Punjabi</option>
+<option value="hi-IN">Hindi</option>
+</select>
+<button class="danger" id="clear">Delete local chats, notes and tasks</button>
+</dialog>
+<script src="./app.js?v=5" defer>
+</script>
+</body>
+</html>
