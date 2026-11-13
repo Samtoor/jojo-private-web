@@ -1,4 +1,4 @@
-const CACHE='jojo-offline-v3-voice';
+const CACHE='jojo-offline-v4-voice';
 const ASSETS=['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icon.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('jojo-offline-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
