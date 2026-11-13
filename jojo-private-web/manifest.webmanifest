@@ -1,0 +1,1 @@
+{"id":"./","name":"jojo Private","short_name":"jojo","description":"Private, offline personal companion","start_url":"./","scope":"./","display":"standalone","background_color":"#080e1c","theme_color":"#080e1c","icons":[{"src":"./icon.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
