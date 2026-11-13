@@ -33,6 +33,8 @@ document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click'
 $('settings').addEventListener('click',()=>{$('speak').checked=!!state.speak;$('mic-consent').checked=!!state.micConsent;$('voice-lang').value=state.voiceLang||'en-CA';$('privacy').showModal();});$('close').addEventListener('click',()=>$('privacy').close());$('speak').addEventListener('change',e=>{state.speak=e.target.checked;save();});
 
 let recognition=null, listening=false;
+$('dictate').addEventListener('click',()=>{const m=$('message');m.focus();status('Use the microphone on your iPhone keyboard to dictate your message, then press Send.');});
+$('mic-test').addEventListener('click',async()=>{if(!navigator.mediaDevices?.getUserMedia){status('Microphone API unavailable. Open jojo directly in Safari, not WhatsApp.');return;}const btn=$('mic-test');btn.disabled=true;try{const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});stream.getTracks().forEach(t=>t.stop());status('Microphone permission works! Voice transcription may still be unavailable in this browser.');}catch(e){status('Mic test: '+(e.name||'unavailable')+'. Open Safari and check microphone site permissions.');}finally{btn.disabled=false;}});
 function status(msg){$('voice-status').textContent=msg;}
 function stopListening(){if(recognition){try{recognition.stop();}catch{}}listening=false;$('mic').textContent='🎙 Talk to jojo';}
 $('voice-test').addEventListener('click',()=>{if(!speak('Hello! I am jojo. Sat Sri Akal!',true))status('Voice playback is not supported in this browser.');});
@@ -46,7 +48,7 @@ $('mic').addEventListener('click',()=>{
  try{
   recognition=new SpeechRecognition();recognition.lang=state.voiceLang||'en-CA';recognition.interimResults=false;recognition.continuous=false;recognition.maxAlternatives=1;
   recognition.onresult=e=>{const t=e.results?.[0]?.[0]?.transcript;if(t){$('message').value=t;send(t);$('message').value='';status('Heard your message. Tap to speak again.');}};
-  recognition.onerror=e=>status('Microphone: '+(e.error||'unavailable')+'. Try keyboard dictation.');
+  recognition.onerror=e=>status('Speech recognition: '+(e.error||'unavailable')+'. Try Safari directly or iPhone dictation.');
   recognition.onend=()=>{listening=false;$('mic').textContent='🎙 Talk to jojo';};
   recognition.start();listening=true;$('mic').textContent='⏹ Stop listening';status('Listening…');
  }catch{status('Could not start microphone. Check Safari permissions.');}
