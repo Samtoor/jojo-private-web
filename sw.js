@@ -1,5 +1,5 @@
-const CACHE='jojo-offline-v6-orb';
-const ASSETS=['./','./index.html','./style.css?v=6','./app.js?v=6','./manifest.webmanifest','./icon.png'];
+const CACHE='jojo-offline-v7-display';
+const ASSETS=['./','./index.html','./style.css?v=7','./app.js?v=7','./manifest.webmanifest','./icon.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('jojo-offline-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{
